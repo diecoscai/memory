@@ -12,9 +12,9 @@ Weekly consolidation run — Sunday 3am UTC.
 
 | Source | Insight | Target |
 |--------|---------|--------|
-| 2026-04-05 journal | Flowise 2.x → 3.x migration gotchas | Obsidian `knowledge/learnings/` |
-| 2026-04-07 journal | Chose Railway over Render for OpenClaw | Obsidian `knowledge/decisions/` |
-| 2026-04-08 journal | Prisma batch upsert pattern | Obsidian `knowledge/patterns/` |
+| 2026-04-05 journal | Framework v2 → v3 migration gotchas | Obsidian `knowledge/learnings/` |
+| 2026-04-07 journal | Chose Railway over Render for deployment | Obsidian `knowledge/decisions/` |
+| 2026-04-08 journal | ORM batch upsert pattern | Obsidian `knowledge/patterns/` |
 | tools-creds.md | Vercel token expired [2026-01-09:3m] | Archive |
 
 ## Write
@@ -32,7 +32,7 @@ Topic files: 4 checked
   tools-creds.md: 23 entries (OK, limit 50)
   infra.md: 18 entries (OK)
   openclaw.md: 41 entries (OK)
-  admirarr.md: 9 entries (OK)
+  my-project.md: 9 entries (OK)
 Boundary test: PASS (0 rules in MEMORY.md)
 TTL audit: 1 expired, 0 missing suffix
 ```

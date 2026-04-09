@@ -71,7 +71,7 @@ Obsidian is authoritative for:
 - **Permanent patterns** — reusable across any platform
 - **Strategic decisions** — reasoning recorded with context
 - **Project knowledge** — up-to-date status for all active projects
-- **Personal identity** — who Max is, who Neo is
+- **Personal identity** — user profile, brand, agent identity
 - **Historical journals** — what happened when
 
 Obsidian is NOT authoritative for:
