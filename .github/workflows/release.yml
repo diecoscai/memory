@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  pre-release-checks:
+    name: Pre-Release Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hook lint
+        run: |
+          for hook in hooks/*.sh; do
+            [ -x "$hook" ] || { echo "$hook not executable"; exit 1; }
+            SHEBANG=$(head -1 "$hook")
+            [[ "$SHEBANG" == "#!/bin/bash" ]] || { echo "$hook bad shebang"; exit 1; }
+          done
+
+      - name: JSON manifests parse
+        run: |
+          python3 -m json.tool .claude-plugin/plugin.json > /dev/null
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          python3 -m json.tool gemini-extension.json > /dev/null
+
+      - name: Version tag matches SKILL.md
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          SKILL_VER=$(grep '^version:' SKILL.md | head -1 | sed 's/version: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')
+          [ "$TAG" = "$SKILL_VER" ] || { echo "Tag v$TAG != SKILL.md $SKILL_VER"; exit 1; }
+
+      - name: CHANGELOG has entry for version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          grep -q "\[$TAG\]" CHANGELOG.md || { echo "No CHANGELOG entry for $TAG"; exit 1; }
+
+  create-release:
+    name: Create GitHub Release
+    needs: pre-release-checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract release notes
+        id: notes
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          # Extract section between this version header and the next version header (or EOF)
+          NOTES=$(awk "/^## \[$TAG\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md)
+          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.notes.outputs.notes }}
+          generate_release_notes: false

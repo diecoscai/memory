@@ -1,0 +1,43 @@
+{
+  "name": "memory",
+  "version": "1.0.0",
+  "description": "Cross-platform memory system. 3-tier architecture, vault sync, session hooks, weekly consolidation.",
+  "settings": [
+    {
+      "name": "Obsidian Vault Path",
+      "description": "Absolute path to your Obsidian vault",
+      "envVar": "OBSIDIAN_VAULT_PATH",
+      "sensitive": false
+    },
+    {
+      "name": "Obsidian CLI Path",
+      "description": "Path to obsidian CLI binary (default: /usr/local/bin/obsidian)",
+      "envVar": "OBSIDIAN_CLI_PATH",
+      "sensitive": false
+    },
+    {
+      "name": "OpenClaw Config Path",
+      "description": "Path to openclaw-config repo for Mode 2 sync",
+      "envVar": "OPENCLAW_CONFIG_PATH",
+      "sensitive": false
+    },
+    {
+      "name": "Router Max Lines",
+      "description": "Max lines in MEMORY.md router (default: 15)",
+      "envVar": "MEMORY_ROUTER_MAX_LINES",
+      "sensitive": false
+    },
+    {
+      "name": "Topic Max Entries",
+      "description": "Max entries per topic file before split alert (default: 50)",
+      "envVar": "MEMORY_TOPIC_MAX_ENTRIES",
+      "sensitive": false
+    },
+    {
+      "name": "REM Sleep Schedule",
+      "description": "Cron expression for weekly consolidation (default: 0 3 * * 0)",
+      "envVar": "REM_SLEEP_SCHEDULE",
+      "sensitive": false
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "memory",
+  "description": "Cross-platform memory system. 3-tier architecture, vault sync, session hooks, weekly consolidation.",
+  "owner": {
+    "name": "maxtechera",
+    "url": "https://github.com/maxtechera"
+  },
+  "plugins": [
+    {
+      "name": "memory",
+      "description": "Your agents forget everything between sessions. Memory fixes that. 3-tier HOT/WARM/COLD architecture with WAL protocol, Obsidian vault sync, and weekly consolidation.",
+      "version": "1.0.0",
+      "author": {
+        "name": "maxtechera",
+        "url": "https://github.com/maxtechera"
+      },
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/maxtechera/memory"
+    }
+  ]
+}

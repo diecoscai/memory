@@ -1,0 +1,164 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  hook-lint:
+    name: Hook Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check hooks are executable
+        run: |
+          ERRORS=0
+          for hook in hooks/*.sh; do
+            if [ ! -x "$hook" ]; then
+              echo "ERROR: $hook is not executable"
+              ERRORS=$((ERRORS + 1))
+            fi
+            SHEBANG=$(head -1 "$hook")
+            if [[ "$SHEBANG" != "#!/bin/bash" ]]; then
+              echo "ERROR: $hook missing #!/bin/bash shebang (found: $SHEBANG)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo "$ERRORS hook lint errors found"
+            exit 1
+          fi
+          echo "All hooks pass lint checks"
+
+  manifest-validation:
+    name: Manifest Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required files exist
+        run: |
+          for f in \
+            .claude-plugin/marketplace.json \
+            .claude-plugin/plugin.json \
+            gemini-extension.json \
+            .clawhubignore \
+            SKILL.md \
+            WORKFLOW.md \
+            .env.example; do
+            [ -f "$f" ] || { echo "MISSING: $f"; exit 1; }
+          done
+          echo "All required files present"
+
+      - name: JSON files parse
+        run: |
+          for f in \
+            .claude-plugin/plugin.json \
+            .claude-plugin/marketplace.json \
+            gemini-extension.json; do
+            python3 -m json.tool "$f" > /dev/null || { echo "INVALID JSON: $f"; exit 1; }
+          done
+          echo "All JSON valid"
+
+      - name: plugin.json required keys
+        run: |
+          python3 -c "
+          import json, sys
+          d = json.load(open('.claude-plugin/plugin.json'))
+          required = ['name', 'version', 'description', 'license', 'skills', 'hooks']
+          missing = [k for k in required if k not in d]
+          if missing:
+            print(f'plugin.json missing keys: {missing}')
+            sys.exit(1)
+          print('plugin.json keys OK')
+          "
+
+      - name: marketplace.json required keys
+        run: |
+          python3 -c "
+          import json, sys
+          d = json.load(open('.claude-plugin/marketplace.json'))
+          assert '\$schema' in d, 'Missing \$schema'
+          assert 'plugins' in d and len(d['plugins']) > 0, 'Missing plugins array'
+          p = d['plugins'][0]
+          required = ['name', 'description', 'version', 'source']
+          missing = [k for k in required if k not in p]
+          if missing:
+            print(f'marketplace.json plugin missing keys: {missing}')
+            sys.exit(1)
+          print('marketplace.json keys OK')
+          "
+
+  version-sync:
+    name: Version Sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract SKILL.md version
+        id: skill_version
+        run: |
+          VERSION=$(grep '^version:' SKILL.md | head -1 | sed 's/version: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "SKILL.md version: $VERSION"
+
+      - name: Check plugin.json version
+        run: |
+          EXPECTED="${{ steps.skill_version.outputs.version }}"
+          ACTUAL=$(python3 -c "import json; print(json.load(open('.claude-plugin/plugin.json'))['version'])")
+          [ "$EXPECTED" = "$ACTUAL" ] || { echo "plugin.json version mismatch: expected $EXPECTED, got $ACTUAL"; exit 1; }
+
+      - name: Check marketplace.json version
+        run: |
+          EXPECTED="${{ steps.skill_version.outputs.version }}"
+          ACTUAL=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['plugins'][0]['version'])")
+          [ "$EXPECTED" = "$ACTUAL" ] || { echo "marketplace.json version mismatch: expected $EXPECTED, got $ACTUAL"; exit 1; }
+
+      - name: Check gemini-extension.json version
+        run: |
+          EXPECTED="${{ steps.skill_version.outputs.version }}"
+          ACTUAL=$(python3 -c "import json; print(json.load(open('gemini-extension.json'))['version'])")
+          [ "$EXPECTED" = "$ACTUAL" ] || { echo "gemini-extension.json version mismatch: expected $EXPECTED, got $ACTUAL"; exit 1; }
+
+  cross-doc-checks:
+    name: Cross-Doc Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: SKILL.md required frontmatter
+        run: |
+          for field in "name:" "version:" "description:" "author:" "license:"; do
+            grep -q "^$field" SKILL.md || { echo "SKILL.md missing frontmatter: $field"; exit 1; }
+          done
+          echo "SKILL.md frontmatter OK"
+
+      - name: WORKFLOW.md has 5 stages
+        run: |
+          for stage in "Stage 1" "Stage 2" "Stage 3" "Stage 4" "Stage 5"; do
+            grep -q "$stage" WORKFLOW.md || { echo "WORKFLOW.md missing: $stage"; exit 1; }
+          done
+          echo "WORKFLOW.md stages OK"
+
+      - name: optionalEnv covered in .env.example
+        run: |
+          ERRORS=0
+          for var in $(grep -A 100 'optionalEnv:' SKILL.md | grep '^ *- ' | sed 's/^ *- //'); do
+            if ! grep -q "^$var=" .env.example; then
+              echo "WARNING: $var in SKILL.md optionalEnv but not in .env.example"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo "$ERRORS env vars missing from .env.example"
+            exit 1
+          fi
+          echo "All optionalEnv vars covered"
+
+      - name: Hooks directory has README
+        run: |
+          [ -f "hooks/README.md" ] || { echo "Missing hooks/README.md"; exit 1; }
+          echo "hooks/README.md present"

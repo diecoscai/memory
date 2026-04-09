@@ -1,0 +1,8 @@
+# Exclude dev/internal artifacts from ClawHub bundle
+.github/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp3
+*.jsonl
