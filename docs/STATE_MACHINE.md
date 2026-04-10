@@ -75,7 +75,7 @@ Reporting ──done──> Idle
 | `/memory sync` | User command | Detecting (Mode 1) |
 | `/memory sync openclaw` | User command | Detecting (Mode 2) |
 | `/memory sync projects` | User command | Detecting (Mode 3) |
-| `/memory rem-sleep` | User command or cron | Detecting (Mode 4) |
+| `/memory dream` | User command or cron | Detecting (Mode 4) |
 | `/memory audit` | User command | Detecting (audit-only, no writes) |
 | PreCompact hook | Automatic | Detecting (WAL flush only) |
 | Stop hook | Automatic | Detecting (WAL flush only) |
@@ -113,7 +113,7 @@ Errors during Writing do not halt the entire sync. The system continues with rem
 - Classifying: prefixes vault notes with `cc-` origin marker
 - Writing: creates/patches Obsidian knowledge/ and projects/ notes
 
-### Mode 4 (REM Sleep)
+### Mode 4 (Dream)
 - Detecting: last 7 journals + all topic files + MEMORY.md router
 - Full health check after Writing
 - Generates comprehensive report with health alerts

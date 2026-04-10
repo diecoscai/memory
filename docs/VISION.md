@@ -65,7 +65,7 @@ Four sync modes. Seven session hooks. One weekly consolidation.
 | **1. Session sync** | "save to memory" / session end | Session → topics → vault |
 | **2. OpenClaw pull** | "sync openclaw" | OpenClaw journals → Obsidian |
 | **3. Project sync** | "sync projects" | CC project memory → Obsidian |
-| **4. REM Sleep** | Weekly cron / "run REM sleep" | Consolidate + prune + TTL audit |
+| **4. Dream** | Weekly cron / "memory dream" | Analyze memory, consolidate + prune + TTL audit |
 
 Hooks handle the routine: vault stats on session start, state flushed on compaction, everything persisted on session end. You don't invoke them — they fire automatically.
 
@@ -129,9 +129,9 @@ The vault is always the superset. It knows everything every platform knows.
 
 ---
 
-## Slide 9: REM Sleep
+## Slide 9: Dream
 
-The brain's offline processing. Weekly consolidation that keeps memory healthy.
+The brain's offline processing. Analyze memory and evolve. Weekly consolidation that keeps memory healthy.
 
 **What it does**:
 1. Reads last 7 daily journals
@@ -170,11 +170,11 @@ The taxonomy is versioned. The frontmatter is enforced. The Obsidian CLI handles
 
 **Obsidian dependency** — Obsidian app must be running for CLI commands. Hooks fall back to direct filesystem writes if the app is down, but search and index features require the app.
 
-**TTL requires discipline** — If you don't assign TTL suffixes, entries accumulate indefinitely. REM Sleep flags these, but the human must decide: keep, decay, or archive.
+**TTL requires discipline** — If you don't assign TTL suffixes, entries accumulate indefinitely. Dream flags these, but the human must decide: keep, decay, or archive.
 
 **Async, not real-time** — OpenClaw sync is pull-based (Mode 2). Changes on Railway aren't visible in the vault until you run `/memory sync openclaw`. Claude Code and OpenCode sync is real-time via hooks.
 
-**Token budget** — HOT tier is capped at ~2400 tokens. If your MEMORY.md router exceeds this, the agent may not load all of it. REM Sleep enforces the 15-line limit.
+**Token budget** — HOT tier is capped at ~2400 tokens. If your MEMORY.md router exceeds this, the agent may not load all of it. Dream enforces the 15-line limit.
 
 ---
 

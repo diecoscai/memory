@@ -10,7 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Core memory skill (SKILL.md, WORKFLOW.md)
 - 5-stage sync lifecycle: Detect → Classify → Dedup → Write → Report
 - 3-tier memory architecture: HOT (router + WAL), WARM (topic files), COLD (Obsidian vault)
-- 4 sync modes: session, openclaw-pull, cc-project, REM Sleep
+- 4 sync modes: session, openclaw-pull, cc-project, dream
 - WAL protocol for compaction survival
 - TTL convention for memory decay (permanent, operational/6m, project/3m, session/1m)
 - 7 session hooks: session-start, pre-compact, session-stop, agent-start, agent-stop, compact-notification, force-mcp-connectors

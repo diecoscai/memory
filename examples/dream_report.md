@@ -1,4 +1,4 @@
-# REM Sleep Report Example (Mode 4)
+# Dream Report Example (Mode 4)
 
 Weekly consolidation run — Sunday 3am UTC.
 
@@ -41,7 +41,7 @@ TTL audit: 1 expired, 0 missing suffix
 
 ```
 Memory sync complete
-Mode: 4 REM-sleep
+Mode: 4 dream
 Topic files updated: 0 entries across 0 files (1 archived)
 Obsidian: 1 pattern, 1 decision, 1 learning, 0 journals
 SESSION-STATE: N/A (cron mode)

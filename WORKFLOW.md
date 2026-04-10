@@ -1,6 +1,6 @@
 # Memory Workflow — 5-Stage Sync Lifecycle
 
-Every memory operation follows this lifecycle. Whether triggered by `/memory sync`, `/memory rem-sleep`, or a session hook, the same 5 stages execute in order.
+Every memory operation follows this lifecycle. Whether triggered by `/memory sync`, `/memory dream`, or a session hook, the same 5 stages execute in order.
 
 > See also: [STATE_MACHINE.md](docs/STATE_MACHINE.md) for formal state transitions.
 
@@ -17,7 +17,7 @@ Every memory operation follows this lifecycle. Whether triggered by `/memory syn
 | Mode 1 (session) | SESSION-STATE.md WAL entries not yet flushed |
 | Mode 2 (openclaw) | New files in `openclaw-config/memory/` not in Obsidian `logs/journals/` |
 | Mode 3 (projects) | Files in `~/.claude/projects/*/memory/*.md` not synced to vault |
-| Mode 4 (REM sleep) | Last 7 daily journals, stale TTLs, bloated routers |
+| Mode 4 (dream) | Last 7 daily journals, stale TTLs, bloated routers |
 
 **Output**: A list of items to process, or "Nothing to sync" → skip to Stage 5.
 
@@ -85,7 +85,7 @@ Every memory operation follows this lifecycle. Whether triggered by `/memory syn
 
 ```
 Memory sync complete
-Mode: [1 session | 2 openclaw-pull | 3 cc-project | 4 REM-sleep]
+Mode: [1 session | 2 openclaw-pull | 3 cc-project | 4 dream]
 Topic files updated: X entries across Y files
 Obsidian: X patterns, Y decisions, Z learnings, N journals
 SESSION-STATE: flushed to memory/YYYY-MM-DD.md
@@ -110,4 +110,4 @@ When multiple sync operations are pending, process in this order:
 2. **Mode 1** — session sync (user-triggered, interactive)
 3. **Mode 3** — CC project sync (on-demand)
 4. **Mode 2** — OpenClaw pull sync (on-demand)
-5. **Mode 4** — REM Sleep (scheduled, background)
+5. **Mode 4** — Dream (scheduled, background)

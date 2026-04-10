@@ -34,9 +34,9 @@
       "sensitive": false
     },
     {
-      "name": "REM Sleep Schedule",
-      "description": "Cron expression for weekly consolidation (default: 0 3 * * 0)",
-      "envVar": "REM_SLEEP_SCHEDULE",
+      "name": "Dream Schedule",
+      "description": "Cron expression for weekly dream cycle (default: 0 3 * * 0)",
+      "envVar": "DREAM_SCHEDULE",
       "sensitive": false
     }
   ]

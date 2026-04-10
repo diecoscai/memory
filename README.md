@@ -73,18 +73,18 @@ export OPENCLAW_CONFIG_PATH="/path/to/openclaw-config"
 
 This enables `/memory sync openclaw` to pull OpenClaw journals into your vault.
 
-### Level 3: Full REM Sleep
+### Level 3: Dream (Analyze & Evolve)
 
-Weekly consolidation prunes old entries and audits TTL decay. Trigger manually anytime:
+The dream cycle analyzes your memory, consolidates insights, prunes old entries, and audits TTL decay. Trigger manually anytime:
 
 ```
-/memory rem-sleep
+/memory dream
 ```
 
 Or set a cron schedule (Sunday 3am = `0 3 * * 0`) in your shell profile:
 
 ```bash
-export REM_SLEEP_SCHEDULE="0 3 * * 0"
+export DREAM_SCHEDULE="0 3 * * 0"
 ```
 
 ---
@@ -96,7 +96,7 @@ export REM_SLEEP_SCHEDULE="0 3 * * 0"
 | `/memory sync` | Sync current session to memory (Mode 1) |
 | `/memory sync openclaw` | Pull OpenClaw journals into Obsidian (Mode 2) |
 | `/memory sync projects` | Sync Claude Code project memory to Obsidian (Mode 3) |
-| `/memory rem-sleep` | Weekly consolidation: journals→topics, prune, TTL audit (Mode 4) |
+| `/memory dream` | Analyze memory and evolve: journals→topics, prune, TTL audit (Mode 4) |
 | `/memory status` | Memory health: tier sizes, TTL alerts, last sync times |
 | `/memory setup` | Configure vault path, detect platforms, install hooks |
 | `/memory audit` | TTL audit + boundary check + health alerts |
@@ -209,7 +209,7 @@ Health: OK
 | 1 | `/memory sync` | Current session insights | Session → WARM → COLD |
 | 2 | `/memory sync openclaw` | OpenClaw journals | OpenClaw → Obsidian |
 | 3 | `/memory sync projects` | CC project memory files | `~/.claude/projects/` → Obsidian |
-| 4 | `/memory rem-sleep` | Everything + consolidation | All tiers + prune + TTL audit |
+| 4 | `/memory dream` | Everything + consolidation | All tiers + prune + TTL audit |
 
 ---
 
@@ -240,7 +240,7 @@ Every memory entry has a shelf life:
 | project | `[date:3m]` | 3 months | Project-specific facts |
 | session | `[date:1m]` | 30 days | Research notes, citations |
 
-REM Sleep (Mode 4) audits TTLs weekly and flags expired entries.
+Dream (Mode 4) audits TTLs weekly and flags expired entries.
 
 ---
 
@@ -253,7 +253,7 @@ REM Sleep (Mode 4) audits TTLs weekly and flags expired entries.
 | `OPENCLAW_CONFIG_PATH` | Path to openclaw-config repo | None (Mode 2 only) |
 | `MEMORY_ROUTER_MAX_LINES` | Max lines in MEMORY.md router | 15 |
 | `MEMORY_TOPIC_MAX_ENTRIES` | Max entries per topic file | 50 |
-| `REM_SLEEP_SCHEDULE` | Cron expression for weekly consolidation | `0 3 * * 0` |
+| `DREAM_SCHEDULE` | Cron expression for weekly consolidation | `0 3 * * 0` |
 
 ---
 

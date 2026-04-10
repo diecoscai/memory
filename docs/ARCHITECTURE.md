@@ -33,7 +33,7 @@ Definitive reference for the HOT/WARM/COLD memory architecture.
 - Contains ONLY facts and pointers — never rules
 - Max 15 lines
 - Format: `- [Title](topic-file.md) — one-line hook`
-- Pruned by REM Sleep weekly
+- Pruned by Dream weekly
 
 ### SESSION-STATE.md (WAL)
 
@@ -108,7 +108,7 @@ source: "origin"
 | Direction | When | Example |
 |-----------|------|---------|
 | HOT → WARM | MEMORY.md pruned, fact moves to topic file | Router entry → `memory/topics/infra.md` |
-| WARM → COLD | Pattern recognized, or REM Sleep promotes | Topic fact → Obsidian `knowledge/patterns/` |
+| WARM → COLD | Pattern recognized, or Dream promotes | Topic fact → Obsidian `knowledge/patterns/` |
 | WARM → archived | TTL expired, entry no longer relevant | Old API version → deleted or archived |
 | COLD → never moves | Permanent knowledge stays in vault | Patterns, decisions are forever |
 
@@ -124,7 +124,7 @@ Facts flow DOWN the tiers (HOT → WARM → COLD). They never flow up. The HOT t
 | SESSION-STATE.md | ~800 | ~1800 |
 | **HOT total** | ~1200 | ~2400 |
 
-If MEMORY.md + SESSION-STATE.md exceed 2400 tokens, the agent may truncate. REM Sleep health checks flag this condition.
+If MEMORY.md + SESSION-STATE.md exceed 2400 tokens, the agent may truncate. Dream health checks flag this condition.
 
 ---
 

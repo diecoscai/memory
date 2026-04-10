@@ -2,7 +2,7 @@
 name: memory
 version: "1.0.0"
 description: "Cross-platform memory system. 3-tier architecture, vault sync, session hooks, weekly consolidation."
-argument-hint: 'memory sync, memory status, memory rem-sleep, memory setup, memory audit'
+argument-hint: 'memory sync, memory status, memory dream, memory setup, memory audit'
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion
 homepage: https://github.com/maxtechera/memory
 repository: https://github.com/maxtechera/memory
@@ -18,8 +18,8 @@ triggers:
   - save to memory
   - remember this
   - sync openclaw
-  - run REM sleep
-  - rem sleep
+  - memory dream
+  - dream
   - memory audit
 metadata:
   openclaw:
@@ -30,7 +30,7 @@ metadata:
       - OPENCLAW_CONFIG_PATH
       - MEMORY_ROUTER_MAX_LINES
       - MEMORY_TOPIC_MAX_ENTRIES
-      - REM_SLEEP_SCHEDULE
+      - DREAM_SCHEDULE
     tags:
       - memory
       - obsidian
@@ -54,7 +54,7 @@ Cross-platform memory system for AI agents. 3-tier architecture (HOT/WARM/COLD),
 | `/memory sync` | Sync current session to memory (Mode 1) |
 | `/memory sync openclaw` | Pull OpenClaw journals into Obsidian (Mode 2) |
 | `/memory sync projects` | Sync Claude Code project memory to Obsidian (Mode 3) |
-| `/memory rem-sleep` | Weekly consolidation: journals→topics, prune, TTL audit (Mode 4) |
+| `/memory dream` | Analyze memory and evolve: journals→topics, prune, TTL audit (Mode 4) |
 | `/memory status` | Memory health: tier sizes, TTL alerts, last sync times |
 | `/memory setup` | Configure vault path, detect platforms, install hooks |
 | `/memory audit` | TTL audit + boundary check + health alerts |
@@ -226,9 +226,9 @@ Trigger: "sync claude code memory" / "sync projects"
    - Plan file → Obsidian `knowledge/patterns/cc-plan-{name}.md`
 4. **Dedup**: Search Obsidian for existing `cc-{name}` notes before creating. Patch if exists.
 
-### Mode 4: REM Sleep (Weekly Consolidation)
+### Mode 4: Dream (Analyze & Evolve)
 
-Trigger: Weekly cron OR "run REM sleep"
+Trigger: Weekly cron OR "memory dream" OR "dream"
 
 1. Read last 7 daily journals from `memory/YYYY-MM-DD.md` (relative to working directory)
 2. For each journal entry, classify using the decision logic above → route to `memory/topics/*.md`
@@ -383,7 +383,7 @@ Every sync operation outputs a structured report:
 
 ```
 Memory sync complete
-Mode: [1 session | 2 openclaw-pull | 3 cc-project | 4 REM-sleep]
+Mode: [1 session | 2 openclaw-pull | 3 cc-project | 4 dream]
 Topic files updated: X entries across Y files
 Obsidian: X patterns, Y decisions, Z learnings, N journals
 SESSION-STATE: flushed to memory/YYYY-MM-DD.md
@@ -403,7 +403,7 @@ Health: [OK | ALERTS: ...]
 | `OPENCLAW_CONFIG_PATH` | Path to openclaw-config repo | None (Mode 2 only) |
 | `MEMORY_ROUTER_MAX_LINES` | Max lines in MEMORY.md router | 15 |
 | `MEMORY_TOPIC_MAX_ENTRIES` | Max entries per topic file | 50 |
-| `REM_SLEEP_SCHEDULE` | Cron expression for weekly consolidation | `0 3 * * 0` |
+| `DREAM_SCHEDULE` | Cron expression for weekly consolidation | `0 3 * * 0` |
 
 ---
 
