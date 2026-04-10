@@ -37,6 +37,10 @@ ln -sf /path/to/memory/hooks/force-mcp-connectors.sh ~/.claude/hooks/
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/session-start-vault.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/force-mcp-connectors.sh"
           }
         ]
       }

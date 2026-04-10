@@ -65,7 +65,7 @@ Cross-platform memory system for AI agents. 3-tier architecture (HOT/WARM/COLD),
 
 ```
 HOT   ≤2400tok, always loaded
-  MEMORY.md          = router (identity, focus, project index, topic pointers)
+  MEMORY.md          = router (project index, topic pointers — facts only)
   SESSION-STATE.md   = WAL hot RAM (current task, decisions, pending actions)
 
 WARM  on-demand read when domain is relevant
@@ -258,7 +258,7 @@ obsidian tags counts sort=count   # List tags
 
 ### Obsidian Frontmatter Schema
 
-All vault notes must conform to `knowledge/TAXONOMY.md`:
+All vault notes must conform to this schema (defined in your vault's `knowledge/TAXONOMY.md`):
 
 ```yaml
 ---

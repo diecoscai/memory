@@ -25,6 +25,10 @@
       {
         "type": "command",
         "command": "bash hooks/session-start-vault.sh"
+      },
+      {
+        "type": "command",
+        "command": "bash hooks/force-mcp-connectors.sh"
       }
     ],
     "PreCompact": [

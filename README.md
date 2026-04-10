@@ -147,9 +147,9 @@ Hooks fire automatically on Claude Code lifecycle events. No manual invocation n
 
 | Hook | When | What It Does |
 |------|------|-------------|
-| `session-start-vault.sh` | Session starts | Injects vault stats: path, note count, journals this month |
+| `session-start-vault.sh` | Session starts | Injects vault awareness: path, note count, journal count |
 | `pre-compact-vault.sh` | Before compaction | Appends SESSION-STATE to vault daily journal |
-| `session-stop-vault.sh` | Session ends | Flushes state to vault + `~/.claude/compaction-state/` |
+| `session-stop-vault.sh` | Session ends | Flushes state to vault + `~/.claude/compaction-state/latest.md` |
 | `agent-start.sh` | Subagent spawned | Increments agent counter |
 | `agent-stop.sh` | Subagent finished | Decrements agent counter |
 | `compact-notification.sh` | After compaction | Prints vault stats + session state preview |
@@ -166,9 +166,11 @@ ln -sf ~/dev/memory/hooks/pre-compact-vault.sh ~/.claude/hooks/
 ln -sf ~/dev/memory/hooks/session-stop-vault.sh ~/.claude/hooks/
 ln -sf ~/dev/memory/hooks/agent-start.sh ~/.claude/hooks/
 ln -sf ~/dev/memory/hooks/agent-stop.sh ~/.claude/hooks/
+ln -sf ~/dev/memory/hooks/compact-notification.sh ~/.claude/hooks/
+ln -sf ~/dev/memory/hooks/force-mcp-connectors.sh ~/.claude/hooks/
 ```
 
-Then update `~/.claude/settings.json` to register the hooks. See `hooks/README.md` for the full configuration.
+Then update `~/.claude/settings.json` to register the hooks. See [hooks/README.md](hooks/README.md) for the full configuration.
 
 ---
 
@@ -193,6 +195,7 @@ The most important rule: **MEMORY.md contains facts. AGENTS.md contains rules. N
 | `AGENTS.md` | Behavioral rules, policies | Facts, configs |
 | `SESSION-STATE.md` | Live context, WAL entries | Long-term facts |
 | `memory/topics/*.md` | Domain facts with TTL | Rules |
+| Obsidian `knowledge/` | Patterns, decisions, learnings | Ephemeral session data |
 
 **Boundary test**: `grep -c "NEVER\|ALWAYS\|must\|rule" MEMORY.md` must return 0.
 
@@ -202,9 +205,9 @@ The most important rule: **MEMORY.md contains facts. AGENTS.md contains rules. N
 
 Every memory entry has a shelf life:
 
-| Class | Suffix | TTL | Example |
-|-------|--------|-----|---------|
-| permanent | (none) | forever | Core architecture decisions |
+| Class | Suffix | Default TTL | Example |
+|-------|--------|-------------|---------|
+| permanent | (no suffix) | forever | Core architecture decisions |
 | operational | `[date:6m]` | 6 months | API versions, tool configs |
 | project | `[date:3m]` | 3 months | Project-specific facts |
 | session | `[date:1m]` | 30 days | Research notes, citations |
@@ -217,12 +220,12 @@ REM Sleep (Mode 4) audits TTLs weekly and flags expired entries.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OBSIDIAN_VAULT_PATH` | Absolute path to Obsidian vault | Auto-detected |
+| `OBSIDIAN_VAULT_PATH` | Absolute path to Obsidian vault | Auto-detected if app running |
 | `OBSIDIAN_CLI_PATH` | Path to obsidian CLI binary | `/usr/local/bin/obsidian` |
-| `OPENCLAW_CONFIG_PATH` | Path to openclaw-config repo | None |
-| `MEMORY_ROUTER_MAX_LINES` | Max lines in MEMORY.md | 15 |
+| `OPENCLAW_CONFIG_PATH` | Path to openclaw-config repo | None (Mode 2 only) |
+| `MEMORY_ROUTER_MAX_LINES` | Max lines in MEMORY.md router | 15 |
 | `MEMORY_TOPIC_MAX_ENTRIES` | Max entries per topic file | 50 |
-| `REM_SLEEP_SCHEDULE` | Cron for weekly consolidation | `0 3 * * 0` |
+| `REM_SLEEP_SCHEDULE` | Cron expression for weekly consolidation | `0 3 * * 0` |
 
 ---
 

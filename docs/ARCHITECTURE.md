@@ -78,9 +78,10 @@ Definitive reference for the HOT/WARM/COLD memory architecture.
 | `decision` | `knowledge/decisions/` | Strategic choices with rationale |
 | `journal` | `logs/journals/` | Daily logs (from hooks + sync) |
 | `session-digest` | `logs/sessions/` | Auto-generated session summaries |
+| (evolutions) | `logs/evolutions/` | Self-improvement proposals, evolution records |
 | `project` | `projects/` | Active/archived project notes |
 | `moc` | `*/_*.md` | Maps of Content (index files) |
-| `reference` | `dev/` | Tech docs, stack guides, integration specs |
+| `reference` | `dev/stacks/`, `dev/tools/`, `dev/architecture/`, `dev/integrations/` | Tech docs, stack guides, integration specs |
 | `identity` | `identity/` | Profile, brand, identity docs |
 | `operations` | `operations/` | Workflows, playbooks, agent definitions |
 
