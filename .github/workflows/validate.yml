@@ -145,18 +145,28 @@ jobs:
 
       - name: optionalEnv covered in .env.example
         run: |
-          ERRORS=0
-          for var in $(grep -A 100 'optionalEnv:' SKILL.md | grep '^ *- ' | sed 's/^ *- //'); do
-            if ! grep -q "^$var=" .env.example; then
-              echo "WARNING: $var in SKILL.md optionalEnv but not in .env.example"
-              ERRORS=$((ERRORS + 1))
-            fi
-          done
-          if [ $ERRORS -gt 0 ]; then
-            echo "$ERRORS env vars missing from .env.example"
-            exit 1
-          fi
-          echo "All optionalEnv vars covered"
+          python3 - <<'EOF'
+          import re, sys
+          with open('SKILL.md') as f:
+              content = f.read()
+          # Extract optionalEnv list items — stop at next yaml key at same indent level
+          m = re.search(r'optionalEnv:\s*\n((?:[ \t]+-[^\n]+\n?)*)', content)
+          if not m:
+              print("No optionalEnv found in SKILL.md")
+              sys.exit(0)
+          vars = re.findall(r'^\s+-\s+(\S+)', m.group(1), re.MULTILINE)
+          with open('.env.example') as f:
+              env_example = f.read()
+          errors = []
+          for var in vars:
+              if not re.search(rf'^{re.escape(var)}=', env_example, re.MULTILINE):
+                  errors.append(f"WARNING: {var} in SKILL.md optionalEnv but not in .env.example")
+          if errors:
+              print('\n'.join(errors))
+              print(f"{len(errors)} env vars missing from .env.example")
+              sys.exit(1)
+          print(f"All {len(vars)} optionalEnv vars covered")
+          EOF
 
       - name: Hooks directory has README
         run: |
