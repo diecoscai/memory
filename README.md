@@ -5,8 +5,14 @@
 
 **Your AI agents forget everything between sessions. Memory fixes that.**
 
+Claude Code:
 ```
 /plugin marketplace add maxtechera/memory
+```
+
+OpenClaw:
+```
+clawhub install memory
 ```
 
 Run `/memory setup` once — session hooks fire automatically after that.
@@ -31,39 +37,26 @@ Session hooks capture what your agent learns — decisions, preferences, context
 
 ## Install
 
-**Claude Code (Recommended)**
+### Claude Code
 
+#### Install
 ```
 /plugin marketplace add maxtechera/memory
-/plugin install memory@memory
 ```
 
-**Manual (Claude Code)**
+#### Update
+```
+claude plugin update memory@memory-skill
+```
 
+### OpenClaw
+```bash
+clawhub install memory
+```
+
+### Manual
 ```bash
 git clone https://github.com/maxtechera/memory.git ~/.claude/skills/memory
-```
-
-**OpenClaw / OpenCode**
-
-Copy the SKILL.md into your skills directory:
-
-```bash
-git clone https://github.com/maxtechera/memory.git ~/.agents/skills/memory
-```
-
-**Gemini CLI**
-
-```bash
-gemini extensions install maxtechera/memory
-```
-
-**Codex CLI**
-
-The repo includes `.codex-plugin/plugin.json` for Codex discovery. Clone to your agents directory:
-
-```bash
-git clone https://github.com/maxtechera/memory.git ~/.agents/skills/memory
 ```
 
 ---
