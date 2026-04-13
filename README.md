@@ -8,15 +8,10 @@
 ```
 /plugin marketplace add maxtechera/memory
 ```
-```bash
-clawhub install memory
-```
 
-Zero config. Run `/memory setup` once — session hooks fire automatically after that.
+Run `/memory setup` once — session hooks fire automatically after that.
 
 ---
-
-Your AI agents forget everything between sessions. Memory fixes that.
 
 Session hooks capture what your agent learns — decisions, preferences, context — and persist it across compactions and session boundaries. Your next session picks up where the last one left off.
 
@@ -49,10 +44,12 @@ Session hooks capture what your agent learns — decisions, preferences, context
 git clone https://github.com/maxtechera/memory.git ~/.claude/skills/memory
 ```
 
-**ClawHub / OpenClaw**
+**OpenClaw / OpenCode**
+
+Copy the SKILL.md into your skills directory:
 
 ```bash
-clawhub install memory
+git clone https://github.com/maxtechera/memory.git ~/.agents/skills/memory
 ```
 
 **Gemini CLI**
@@ -62,6 +59,8 @@ gemini extensions install maxtechera/memory
 ```
 
 **Codex CLI**
+
+The repo includes `.codex-plugin/plugin.json` for Codex discovery. Clone to your agents directory:
 
 ```bash
 git clone https://github.com/maxtechera/memory.git ~/.agents/skills/memory
@@ -292,15 +291,19 @@ memory/
 ├── SKILL.md              # The skill — agents read this
 ├── WORKFLOW.md           # 5-stage sync lifecycle
 ├── README.md             # You are here
-├── hooks/                # Session lifecycle hooks
+├── hooks/                # 7 session lifecycle hooks
 ├── docs/
 │   ├── VISION.md         # Vision deck
 │   ├── STATE_MACHINE.md  # Sync state transitions
 │   ├── ARCHITECTURE.md   # 3-tier memory reference
 │   └── SYNC_PROTOCOL.md  # Cross-platform contract
 ├── examples/             # Sync examples and reports
-├── .claude-plugin/       # Claude Code marketplace
+├── .claude-plugin/       # Claude Code marketplace manifests
+├── .codex-plugin/        # Codex CLI discovery
+├── .agents/              # OpenCode/OpenClaw skill discovery
 ├── gemini-extension.json # Gemini CLI manifest
+├── .env.example          # All configuration variables
+├── .clawhubignore        # Distribution exclusions
 └── .github/workflows/    # CI validation + release
 ```
 
