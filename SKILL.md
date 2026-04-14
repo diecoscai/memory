@@ -1,7 +1,7 @@
 ---
 name: memory
 version: "1.0.0"
-description: "Cross-platform memory system. 3-tier HOT/WARM/COLD + LLM Wiki (Mode 5). Vault sync, session hooks, weekly consolidation, Notion publishing."
+description: "Cross-platform memory system. 3-tier HOT/WARM/COLD + LLM Wiki. Exhaustive source sync, session hooks, weekly consolidation, Notion publishing."
 argument-hint: 'memory sync, memory status, memory dream, memory setup, memory audit, memory wiki ingest, memory wiki sync notion'
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent, AskUserQuestion
 homepage: https://github.com/maxtechera/memory
@@ -17,7 +17,6 @@ triggers:
   - sync memory
   - save to memory
   - remember this
-  - sync openclaw
   - memory dream
   - dream
   - memory audit
@@ -188,22 +187,35 @@ Example: `Stripe API v2024-12 [2026-03-16:6m]`
 
 ---
 
-## Sync Modes
-
-### Mode 1: Session → Memory
+## Sync
 
 Trigger: "save to memory" / "remember this" / "sync memory" / session compaction
 
-**Paths**: All paths are relative to the current working directory unless specified.
-- `SESSION-STATE.md` — in the current working directory (Claude Code creates it here)
-- `MEMORY.md` — in the current working directory
-- `memory/topics/*.md` — subdirectory of current working directory
-- `memory/YYYY-MM-DD.md` — daily journal in same subdirectory
+`/memory sync` — no sub-commands, no flags. Every sync scrapes all available sources.
 
-**Steps**:
+**Sources (all checked on every sync):**
 
-1. **Update SESSION-STATE.md** (WAL) — if significant fact/decision surfaced, write it now
-2. **Classify each insight** using this decision logic:
+| Source | Path | Available when |
+|--------|------|----------------|
+| Session conversation | current context | always |
+| Session state | `SESSION-STATE.md` (cwd) | always |
+| Local journals | `memory/YYYY-MM-DD.md` (cwd) | if files exist |
+| Compaction state | `~/.claude/compaction-state/latest.md` | if file exists |
+| CC project memories | `~/.claude/projects/*/memory/*.md` | always |
+| CC saved plans | `~/.claude/plans/*.md` | if files exist |
+| OpenClaw journals | `$OPENCLAW_CONFIG_PATH/memory/*.md` | if env var set |
+| OpenClaw topics | `$OPENCLAW_CONFIG_PATH/memory/topics/*.md` | if env var set |
+
+**Pipeline:**
+
+1. **Collect** — scan all sources above into one insight pool; mark each item with source label
+   - Dated sources (journals, compaction state): skip entries already in the vault
+   - CC project memories: read all files, infer type from frontmatter or content; prefix output filenames with `cc-`
+   - OpenClaw: strip raw JSON/webhook payloads; keep human-readable insights, summaries, decisions
+   - OpenClaw journals → write to Obsidian `logs/journals/YYYY-MM-DD.md` with `source: openclaw-config/memory/` frontmatter
+   - OpenClaw topics → compare against `knowledge/learnings/openclaw-operational-lessons.md`, patch in new entries
+
+2. **Classify** — run the full decision tree on every item in the pool:
    - Contains a server, deploy, hosting, or infrastructure fact → `memory/topics/infra.md`
    - References a specific project by name → `memory/topics/{project}.md`
    - Contains an API key, CLI tool, credential, or version number → `memory/topics/tools-creds.md`
@@ -212,61 +224,32 @@ Trigger: "save to memory" / "remember this" / "sync memory" / session compaction
    - Is a one-time gotcha, bug fix, or "I learned that..." → Obsidian `knowledge/learnings/`
    - Is a timestamped event or session summary → `memory/YYYY-MM-DD.md` + Obsidian `logs/journals/`
    - Is a behavioral instruction (NEVER, ALWAYS, must, should) → `AGENTS.md` (NEVER to MEMORY.md)
+   - CC reference/pattern → Obsidian `knowledge/patterns/cc-{name}.md`
+   - CC feedback/learning → Obsidian `knowledge/learnings/cc-{name}.md`
+   - CC decision → Obsidian `knowledge/decisions/cc-{name}.md`
+   - Plan file → Obsidian `knowledge/patterns/cc-plan-{name}.md`
    - If ambiguous: prefer the more specific category. If still unclear: ask the user.
-3. **Dedup before writing**:
+
+3. **Dedup** — before writing each entry:
    - Read the target file
-   - For each new entry, check if an existing entry covers the same topic (same subject + same conclusion)
-   - Semantic match >80% → update in-place (patch). <80% → append as new entry.
-   - If the existing entry says the same thing: skip (duplicate)
-   - If the existing entry covers the same topic but with outdated info: update it in-place
-   - If no match: append as new entry
-4. **Add TTL suffix** to topic entries using this rule:
+   - Semantic match ≥80% → update in-place (patch). <80% → append. Exact duplicate → skip.
+
+4. **TTL** — assign suffix to topic entries:
    - User preference or core architecture decision → permanent (no suffix)
    - API version, tool config, credential → `[today:6m]` (operational)
    - Project-specific fact → `[today:3m]` (project)
    - Research note, session-specific finding → `[today:1m]` (session)
-5. **Keep MEMORY.md as router** — max 15 lines, format: `- [Title](memory/topics/file.md) — one-line description`. If a new domain emerges, create the topic file first, then add the pointer.
 
-### Mode 2: OpenClaw → Obsidian Pull Sync
+5. **Route to tiers** — HOT: update `SESSION-STATE.md` (WAL) + `MEMORY.md` router → WARM: `memory/topics/*.md` → COLD: Obsidian vault (tag per TAXONOMY.md)
+   - Keep `MEMORY.md` ≤15 lines, format: `- [Title](memory/topics/file.md) — one-line description`
 
-Trigger: "sync openclaw" / "pull openclaw memory"
+6. **Feed wiki** — for each new or updated COLD entry, create or update the corresponding `wiki/` page (Karpathy pattern); update `wiki/index.md` if a new page is added; patch existing pages if content changed
 
-**Requires**: `$OPENCLAW_CONFIG_PATH` env var set (path to the local openclaw-config repo).
+7. **Report** — `Session: N | Journals: N | Compaction: N | CC: N | Plans: N | OpenClaw: N | Wiki pages touched: N | Skipped: N (duplicates)`
 
-1. **Discover new journals**: List files in `$OPENCLAW_CONFIG_PATH/memory/*.md`. Compare dates against Obsidian `logs/journals/` — find dates not yet in the vault.
-2. **Read + clean**: For each new journal, read the file. Strip any raw JSON metadata blocks (e.g., Telegram API responses, webhook payloads). Keep human-readable insights, summaries, and decisions.
-3. **Write to Obsidian**: Create `logs/journals/YYYY-MM-DD.md` with this frontmatter:
-   ```yaml
-   type: journal
-   status: active
-   agent-use: medium
-   use-when: "daily log, YYYY-MM-DD, [key topics extracted from content]"
-   summary: "[one-line summary of the day's work]"
-   domain: operations
-   created: 'YYYY-MM-DD'
-   source: "openclaw-config/memory/YYYY-MM-DD.md"
-   ```
-4. **Sync topic insights**: For entries in `$OPENCLAW_CONFIG_PATH/memory/topics/*.md`, compare against Obsidian `knowledge/learnings/openclaw-operational-lessons.md` — patch in new entries.
+## Dream (Analyze & Evolve)
 
-### Mode 3: Claude Code Project Memory → Obsidian
-
-Trigger: "sync claude code memory" / "sync projects"
-
-1. **Scan** these paths using the Glob tool:
-   - `~/.claude/projects/*/memory/*.md` — project memory files
-   - `~/.claude/plans/*.md` — saved plans
-2. **Read each file**, examine its frontmatter `type` field (if present) or infer from content
-3. **Classify and route** (prefix filenames with `cc-` to indicate Claude Code origin):
-   - type=reference or contains reusable pattern → Obsidian `knowledge/patterns/cc-{name}.md`
-   - type=feedback or contains "I learned that..." → Obsidian `knowledge/learnings/cc-{name}.md`
-   - type=project or contains strategic reasoning → Obsidian `knowledge/decisions/cc-{name}.md`
-   - type=project with active status → update Obsidian `projects/{name}.md`
-   - Plan file → Obsidian `knowledge/patterns/cc-plan-{name}.md`
-4. **Dedup**: Search Obsidian for existing `cc-{name}` notes before creating. Patch if exists.
-
-### Mode 4: Dream (Analyze & Evolve)
-
-**Mode 4 runs on schedule (Sunday 3am UTC via `DREAM_SCHEDULE` cron) or manually. It is not optional hygiene — it is the system preventing its own decay. If it hasn't run in 7+ days, memory health degrades silently: journals pile up unclassified, topics bloat past their limits, expired TTLs accumulate.**
+**Runs on schedule (Sunday 3am UTC via `DREAM_SCHEDULE` cron) or manually. Not optional hygiene — it prevents silent decay. If it hasn't run in 7+ days, journals pile up unclassified, topics bloat, expired TTLs accumulate.**
 
 Trigger: Weekly cron OR "memory dream" OR "dream"
 
@@ -274,12 +257,14 @@ Trigger: Weekly cron OR "memory dream" OR "dream"
 2. For each journal entry, classify using the decision logic above → route to `memory/topics/*.md`
 3. Prune MEMORY.md: keep ≤15 lines, zero behavioral rules
 4. TTL audit: scan all topic files, compare `[YYYY-MM-DD:Nm]` suffix against today's date → flag expired
-5. Health check:
+5. Tag audit: ensure all new vault entries have TAXONOMY.md-compliant frontmatter tags + domain
+6. Health check:
    - Topic file > 50 entries → split into sub-topics
    - MEMORY.md > 15 lines → prune immediately
    - Entry > 6 months with no TTL suffix → assign TTL or archive
-6. Sync to Obsidian (Mode 2 pull sync)
-7. If OpenClaw is configured, ask the user before pushing openclaw-config to git
+7. Rebuild wiki: merge stale pages, detect contradictions, rebuild `wiki/index.md` — keep index ≤30 entries
+8. Run `/memory sync` (picks up all sources including OpenClaw + compaction state)
+9. If OpenClaw is configured, ask the user before pushing openclaw-config to git
 
 ---
 
