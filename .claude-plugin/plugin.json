@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Cross-platform memory system. 3-tier architecture, vault sync, session hooks, weekly consolidation.",
   "author": {
-    "name": "maxtechera",
-    "url": "https://github.com/maxtechera"
+    "name": "diecoscai",
+    "url": "https://github.com/diecoscai"
   },
-  "homepage": "https://github.com/maxtechera/memory",
-  "repository": "https://github.com/maxtechera/memory",
+  "homepage": "https://github.com/diecoscai/memory",
+  "repository": "https://github.com/diecoscai/memory",
   "license": "MIT",
   "category": "productivity",
   "keywords": [
@@ -19,6 +19,5 @@
     "consolidation",
     "skill-first"
   ],
-  "skills": ["./"],
-  "hooks": "./hooks/hooks.json"
+  "skills": ["."]
 }
