@@ -19,5 +19,5 @@
     "consolidation",
     "skill-first"
   ],
-  "skills": ["."]
+  "skills": "./skills/"
 }
