@@ -91,7 +91,7 @@ export OBSIDIAN_VAULT_PATH="$HOME/Documents/my-vault"
 export OPENCLAW_CONFIG_PATH="/path/to/openclaw-config"
 ```
 
-This enables `/memory sync openclaw` to pull OpenClaw journals into your vault.
+This enables `/memory sync` to include OpenClaw journals automatically.
 
 ### Level 3: Dream (Analyze & Evolve)
 
@@ -113,48 +113,95 @@ export DREAM_SCHEDULE="0 3 * * 0"
 
 | Command | Description |
 |---------|-------------|
-| `/memory sync` | Sync current session to memory (Mode 1) |
-| `/memory sync openclaw` | Pull OpenClaw journals into Obsidian (Mode 2) |
-| `/memory sync projects` | Sync Claude Code project memory to Obsidian (Mode 3) |
-| `/memory dream` | Analyze memory and evolve: journals→topics, prune, TTL audit (Mode 4) |
+| `/memory sync` | Save everything to memory — all sources, all tiers, wiki |
+| `/memory dream` | Consolidate + TTL audit + rebuild wiki (run weekly) |
 | `/memory status` | Memory health: tier sizes, TTL alerts, last sync times |
 | `/memory setup` | Configure vault path, detect platforms, install hooks |
 | `/memory audit` | TTL audit + boundary check + health alerts |
-| `/memory wiki sync` | **Full pipeline**: init → ingest all vault sources → Notion publish (Mode 5) |
-| `/memory wiki sync --full` | Full pipeline, reprocessing all sources from scratch (Mode 5) |
-| `/memory wiki init` | Initialize wiki/ folder structure in vault (Mode 5) |
-| `/memory wiki ingest [source]` | Process raw source → compile wiki pages (Mode 5) |
-| `/memory wiki ingest --from-memory` | Pull session digests + topics → wiki pages (Mode 5) |
-| `/memory wiki query [topic]` | Answer from compiled wiki, not raw sources (Mode 5) |
-| `/memory wiki sync notion` | Push publish-ready pages to Notion (Mode 5) |
-| `/memory wiki lint` | Health check: orphans, stale, broken links, missing provenance (Mode 5) |
-| `/memory wiki dream` | Bulk consolidation: merge, contradiction detection, rebuild index (Mode 5) |
-| `/memory wiki status` | Wiki stats: pages, stale count, publish queue, last sync (Mode 5) |
+| `/memory wiki sync` | **Full pipeline**: init → ingest all vault sources → Notion publish |
+| `/memory wiki sync --full` | Full pipeline, reprocessing all sources from scratch |
+| `/memory wiki init` | Initialize wiki/ folder structure in vault |
+| `/memory wiki ingest [source]` | Process raw source → compile wiki pages |
+| `/memory wiki ingest --from-memory` | Pull session digests + topics → wiki pages |
+| `/memory wiki query [topic]` | Answer from compiled wiki, not raw sources |
+| `/memory wiki sync notion` | Push publish-ready pages to Notion |
+| `/memory wiki lint` | Health check: orphans, stale, broken links, missing provenance |
+| `/memory wiki dream` | Bulk consolidation: merge, contradiction detection, rebuild index |
+| `/memory wiki status` | Wiki stats: pages, stale count, publish queue, last sync |
 
 ---
 
 ## How It Works
 
-### 3 Steps
+### The agent knows because hooks tell it
 
-1. **Detect** — Find what changed (new session state, stale journals, TTL expirations)
-2. **Classify & Route** — Each insight goes to the right tier: fact → topics, pattern → vault, rule → AGENTS.md
-3. **Write with Proof** — Structured sync report shows exactly what was written, skipped, or flagged
+When you start a Claude Code session, a small script runs in the background and tells the agent: where your vault is, what you were last working on, and where to find more context. That's it. No setup per session, no copy-pasting notes.
 
-### The 3 Tiers
+The same thing happens when the agent spawns a helper (a subagent). Before the helper starts working, it automatically receives a briefing: what the parent was doing, which project this belongs to, and where to look for more information.
+
+**A session from start to finish:**
 
 ```
-HOT   ≤2400tok, always loaded
-  MEMORY.md         = router (pointers to topic files)
-  SESSION-STATE.md  = WAL (current task, decisions, pending)
+You open a session
+  → agent learns your vault location + recent journal count
 
-WARM  on-demand, domain-scoped
-  memory/topics/*.md  facts with TTL decay
-  memory/YYYY-MM-DD.md  daily journals
+You work
+  → agent notes decisions and current task as it goes (SESSION-STATE.md)
 
-COLD  permanent, search-only
-  Obsidian vault    knowledge/ logs/ projects/ identity/
+Claude needs to compress the conversation
+  → current state is saved to your vault before anything is lost
+
+You close the session
+  → everything is flushed to the vault for next time
 ```
+
+**When the agent spawns a helper:**
+
+The helper gets a briefing before its first message:
+
+```
+What project/run this belongs to   ← from .ship-run file
+What the parent was working on     ← from SESSION-STATE.md
+Where to find more context         ← MEMORY.md index + topic files list
+How to query HOT / WARM / COLD     ← access patterns
+```
+
+No re-briefing needed. The helper arrives knowing enough to start.
+
+**How the project ID travels to helpers (multi-agent runs):**
+
+At run start, the engine writes a small ID file:
+
+```bash
+echo "ship-ABC-123" > .ship-run
+```
+
+Every helper spawned in that folder picks it up automatically. If the file isn't there, the hook looks for an env var, then falls back to SESSION-STATE.md. You never wire this manually.
+
+### 3 tiers — hot, warm, cold
+
+Think of these as three places the agent looks, from fastest to deepest:
+
+```
+HOT   Always in context (≤2400 tokens)
+  MEMORY.md         — index of what topics exist
+  SESSION-STATE.md  — what's happening right now
+
+WARM  Loaded on demand, one topic at a time
+  memory/topics/*.md  — facts about a domain, expire over time
+  memory/YYYY-MM-DD.md  — daily journals
+
+COLD  Searched, never fully loaded
+  Obsidian vault    — permanent knowledge, decisions, logs
+```
+
+The agent reads HOT on every session. It pulls WARM files when it needs domain context. It searches COLD when it needs something older or more specific.
+
+### Syncing: 3 steps
+
+1. **Detect** — find what changed (new decisions, stale entries, expired TTLs)
+2. **Classify** — each insight goes to the right tier: fact → topics, pattern → vault, rule → AGENTS.md
+3. **Write with proof** — a sync report shows exactly what was saved, skipped, or flagged
 
 ### Cross-Platform Architecture
 
@@ -169,7 +216,7 @@ COLD  permanent, search-only
       │            │            │
 ┌─────┴─────┐ ┌───┴──┐  ┌─────┴──────┐
 │ Claude    │ │ Open │  │  OpenClaw   │
-│ Code      │ │ Code │  │ (Railway)   │
+│ Code      │ │ + hooks│  │ (Railway)   │
 │ + hooks   │ │      │  │ git → local │
 └───────────┘ └──────┘  └────────────┘
 ```
@@ -185,7 +232,7 @@ Hooks fire automatically on Claude Code lifecycle events. No manual invocation n
 | `session-start-vault.sh` | Session starts | Injects vault awareness: path, note count, journal count |
 | `pre-compact-vault.sh` | Before compaction | Appends SESSION-STATE to vault daily journal |
 | `session-stop-vault.sh` | Session ends | Flushes state to vault + `~/.claude/compaction-state/latest.md` |
-| `agent-start.sh` | Subagent spawned | Increments agent counter |
+| `agent-start.sh` | Subagent spawned | Injects run ID, parent task, MEMORY.md router, WARM topics into subagent context |
 | `agent-stop.sh` | Subagent finished | Decrements agent counter |
 | `compact-notification.sh` | After compaction | Prints vault stats + session state preview |
 | `force-mcp-connectors.sh` | Session starts | Force-enables MCP connectors flag |
@@ -260,19 +307,26 @@ Health: OK
 
 ---
 
-## 5 Sync Modes
+## Sync Sources
 
-| Mode | Command | What It Syncs | Direction |
-|------|---------|---------------|-----------|
-| 1 | `/memory sync` | Current session insights | Session → WARM → COLD |
-| 2 | `/memory sync openclaw` | OpenClaw journals | OpenClaw → Obsidian |
-| 3 | `/memory sync projects` | CC project memory files | `~/.claude/projects/` → Obsidian |
-| 4 | `/memory dream` | Everything + consolidation | All tiers + prune + TTL audit |
-| 5 | `/memory wiki sync` | Vault → compiled wiki → Notion | COLD → WIKI → Notion |
+`/memory sync` collects from all available sources in one pass:
+
+| Source | Path | Available when |
+|--------|------|----------------|
+| Session conversation | current context | always |
+| Session state | `SESSION-STATE.md` | always |
+| Local journals | `memory/YYYY-MM-DD.md` | if files exist |
+| Compaction state | `~/.claude/compaction-state/latest.md` | if file exists |
+| CC project memories | `~/.claude/projects/*/memory/*.md` | always |
+| CC saved plans | `~/.claude/plans/*.md` | if files exist |
+| OpenClaw journals | `$OPENCLAW_CONFIG_PATH/memory/*.md` | if env var set |
+| OpenClaw topics | `$OPENCLAW_CONFIG_PATH/memory/topics/*.md` | if env var set |
+
+Every sync routes to all tiers (HOT → WARM → COLD) and feeds the wiki automatically. Use `/memory dream` weekly to consolidate and rebuild the wiki index.
 
 ---
 
-## LLM Wiki (Mode 5)
+## LLM Wiki
 
 The wiki is a compounding knowledge base — compiled once from your vault sources, maintained by the LLM, published to Notion. Unlike RAG (which re-derives answers from raw docs every time), the wiki synthesizes knowledge into structured pages. You drop sources, run `/memory wiki sync`, and the wiki gets smarter over time.
 
@@ -291,8 +345,8 @@ The wiki feeds from your COLD tier (vault) and publishes outward to Notion. Inde
 
 **The continuous loop:**
 
-1. `/memory sync` — session insights → vault (COLD)
-2. `/memory wiki ingest --from-memory` — vault topics + session digests → wiki pages
+1. `/memory sync` — all sources → tiers (HOT/WARM/COLD) + wiki pages updated automatically
+2. `/memory wiki ingest --from-memory` — vault topics + session digests → wiki pages (manual re-ingest)
 3. `/memory wiki sync notion` — publish-ready pages → Notion
 
 **Cross-repo:** Orchestrator domain skills invoke `/memory sync` at ticket completion to persist execution learnings into the wiki. Over time the wiki builds a knowledge graph of what worked, what failed, and why — across every domain.
