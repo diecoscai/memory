@@ -33,7 +33,7 @@ This is the **AI amnesia tax**: wasted tokens, wasted time, degraded output qual
 
 ---
 
-<video src="docs/obsidian-graph-demo.mp4" autoplay loop muted playsinline width="100%"></video>
+![Your second brain — zooming into the Obsidian knowledge graph](docs/obsidian-graph-demo.gif)
 
 ![Obsidian knowledge graph — your second brain after weeks of sessions](docs/obsidian-graph.png)
 
