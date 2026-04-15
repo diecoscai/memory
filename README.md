@@ -33,6 +33,8 @@ This is the **AI amnesia tax**: wasted tokens, wasted time, degraded output qual
 
 ---
 
+<video src="docs/obsidian-graph-demo.mp4" autoplay loop muted playsinline width="100%"></video>
+
 ![Obsidian knowledge graph — your second brain after weeks of sessions](docs/obsidian-graph.png)
 
 *Your second brain after weeks of sessions. Every node is a memory — decisions, patterns, learnings — automatically written and connected by your agent.*
