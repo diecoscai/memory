@@ -27,3 +27,28 @@ Path: $VAULT_PATH | CLI: obsidian (app running) | Fallback: Read/Grep on $VAULT_
 Taxonomy: $VAULT_PATH/knowledge/TAXONOMY.md (10 types, 8 domains, 48 tags)
 Stats: ~${TOTAL} notes | ${JOURNALS} journals this month
 EOF
+
+# ── Auto-seed SESSION-STATE.md if missing ────────────────────────────────────
+# session-stop-vault.sh exits early when SESSION-STATE.md doesn't exist.
+# This ensures every session has a landing zone for the WAL, preventing vault gaps.
+SESSION_STATE="${PWD}/SESSION-STATE.md"
+if [ ! -f "$SESSION_STATE" ]; then
+  cat > "$SESSION_STATE" <<TEMPLATE
+# SESSION-STATE.md — Active Working Memory (WAL)
+
+## Current Task
+
+
+## Key Context
+
+
+## Pending Actions
+
+
+## Recent Decisions
+
+
+## Blockers
+
+TEMPLATE
+fi
