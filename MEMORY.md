@@ -1,0 +1,2 @@
+- [memory project](memory/topics/memory-project.md) — repo facts, hook state, architecture, README SEO
+- [La Academia OSS](memory/topics/la-academia.md) — offer stack, Linear tickets MAX-564–570, funnel
